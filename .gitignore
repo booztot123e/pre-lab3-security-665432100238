@@ -1,0 +1,17 @@
+# Ignore Node.js modules
+node_modules/
+
+# Ignore database files
+*.db
+
+# Ignore log files (ถ้ามี)
+*.log
+
+# Ignore build/output folders (ถ้ามี)
+dist/
+build/
+
+# Ignore IDE/config files (ถ้ามี)
+.vscode/
+*.sublime-project
+*.sublime-workspace
