@@ -5,7 +5,7 @@
 **วันที่ทำการทดลอง:** 15 กันยายน 2568
 
 ## Experiment 1: SQL Injection
-![alt text](image.png)
+![XSS Alert](screenshots/image.png)
 ### ผลการทดลอง
 - **Payload ที่ทดสอบ:** `admin'; --`
 - **ผลลัพธ์:** ผมลองใส่แล้ว login ได้สำเร็จเลยโดยไม่ต้องใส่รหัสผ่าน แต่หน้าเว็บยังเข้าไม่ได้เลย มี error 404 ขึ้นมา
