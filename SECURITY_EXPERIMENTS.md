@@ -23,7 +23,7 @@
    - เพราะ `--` ทำให้ส่วนที่เหลือของคำสั่ง SQL ถูกข้ามไป ผมเลย login ได้ง่ายๆ
 
 ## Experiment 2: XSS (Cross-Site Scripting)
-![alt text](image-1.png)
+![XSS Alert](screenshots/image1.png)
 ### ผลการทดลอง
 - **Payload ที่ทดสอบ:** `<script>alert('XSS!')</script>`
 - **ผลลัพธ์:** ผมลองส่ง comment แล้วมี alert ขึ้นมาในเบราว์เซอร์เลย 
@@ -34,7 +34,7 @@
 - ผมรู้สึกว่าข้อมูลใน comment ไม่ได้ถูกกรองอะไรเลย ดูอันตราย
 
 ## Experiment 3: การป้องกันด้วย Input Validation
-![alt text](image-2.png)
+![XSS Alert](screenshots/image2.png)
 ### การเปรียบเทียบ
 | ประเภทการโจมตี  | Vulnerable Server | Secure Server | ความแตกต่าง         |
 |------------------|-------------------|---------------|---------------------|
@@ -47,7 +47,7 @@
 3. Prepared statements ดูจะดีในการป้องกัน SQL Injection
 
 ## Experiment 4: Password Security
-![alt text](image-4.png)
+![XSS Alert](screenshots/image4.png)
 ### การเปรียบเทียบวิธีการเก็บรหัสผ่าน
 | วิธีการ         | ระดับความปลอดภัย | ข้อดี          | ข้อเสีย         |
 |-----------------|------------------|----------------|---------------|
@@ -62,7 +62,7 @@
 - **ข้อเสนอแนะที่ได้:** ผมคิดว่าควรใช้ตัวพิมพ์ใหญ่, ตัวเลข, และสัญลักษณ์ เช่น `P@ssw0rd!`
 
 ## Experiment 5: HTTP vs HTTPS
-![alt text](image-5.png)
+![XSS Alert](screenshots/image5.png)
 ### การเปรียบเทียบความปลอดภัย
 | ประเด็น            | HTTP         | HTTPS        |
 |-------------------|--------------|--------------|
