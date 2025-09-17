@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 2: XSS</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-case { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            border-left: 4px solid #ff6b6b;
+        }
+        .comment-form { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+        }
+        .comment { 
+            background: white; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border-left: 3px solid #007bff; 
+        }
+        input, textarea, button { 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        button { background: #007bff; color: white; cursor: pointer; width: auto; }
+        .dangerous { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Experiment 2: Cross-Site Scripting (XSS)</h1>
+        
+        <div class="test-case">
+            <h3>🚨 Vulnerable Comment System</h3>
+            <p>ระบบ comment นี้ไม่มีการป้องกัน XSS - JavaScript จะทำงาน!</p>
+            
+            <div class="comment-form">
+                <h4>เพิ่ม Comment</h4>
+                <form id="commentForm">
+                    <input type="text" id="name" placeholder="ชื่อของคุณ" required>
+                    <textarea id="comment" placeholder="ความคิดเห็น..." rows="3" required></textarea>
+                    <button type="submit">ส่ง Comment</button>
+                </form>
+            </div>
+            
+            <h4>💡 XSS Payloads สำหรับทดสอบ:</h4>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 5px;">
+                <p><strong>Basic XSS:</strong></p>
+                <code>&lt;script&gt;alert('XSS Attack!')&lt;/script&gt;</code><br><br>
+                
+                <p><strong>Image XSS:</strong></p>
+                <code>&lt;img src=x onerror=alert('XSS via IMG')&gt;</code><br><br>
+                
+                <p><strong>Cookie Stealing:</strong></p>
+                <code>&lt;script&gt;alert('Cookie: ' + document.cookie)&lt;/script&gt;</code><br><br>
+                
+                <p><strong>DOM Manipulation:</strong></p>
+                <code>&lt;script&gt;document.body.style.backgroundColor='red'&lt;/script&gt;</code>
+            </div>
+        </div>
+        
+        <div id="comments-section">
+            <h3>💬 Comments</h3>
+            <div id="comments-list"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>📝 คำถามสำหรับสังเกต:</h3>
+            <ol>
+                <li>เมื่อใส่ <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> เกิดอะไรขึ้น?</li>
+                <li>ลองใส่ payload อื่นๆ และสังเกตว่า JavaScript ทำงานอย่างไร?</li>
+                <li>XSS สามารถเข้าถึง cookie ของผู้ใช้ได้หรือไม่?</li>
+                <li>ถ้าเป็นเว็บไซต์จริง XSS จะอันตรายอย่างไร?</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Load comments
+        async function loadComments() {
+            try {
+                const response = await fetch('/comments');
+                const comments = await response.json();
+                
+                const commentsList = document.getElementById('comments-list');
+                commentsList.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <strong>${comment.name}</strong>
+                        <div>${comment.comment}</div>
+                        <small>วันที่: ${new Date(comment.created_at).toLocaleString()}</small>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+        
+        // Add comment
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const comment = document.getElementById('comment').value;
+            
+            try {
+                const response = await fetch('/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, comment })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('commentForm').reset();
+                    loadComments(); // Reload comments
+                }
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
+        });
+        
+        // Load comments on page load
+        loadComments();
+    </script>
+</body>
+</html>

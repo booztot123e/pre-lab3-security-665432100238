@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 3: Security Protection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .test-case { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            border-radius: 8px; 
+        }
+        .vulnerable { border-left: 4px solid #ff6b6b; }
+        .secure { border-left: 4px solid #51cf66; }
+        input, textarea, button { 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        button { background: #007bff; color: white; cursor: pointer; width: auto; }
+        .result { 
+            margin-top: 10px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            background: #e9ecef; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Experiment 3: การป้องกันความปลอดภัย</h1>
+        
+        <h2>เปรียบเทียบ: ก่อนและหลังการป้องกัน</h2>
+        
+        <div class="comparison">
+            <div class="test-case vulnerable">
+                <h3>🚨 ระบบที่มีช่องโหว่</h3>
+                <p>ทดสอบ login กับเซิร์ฟเวอร์ที่มีช่องโหว่ (port 3001)</p>
+                
+                <form id="vulnerableLogin">
+                    <input type="text" placeholder="Username" value="admin'; --">
+                    <input type="password" placeholder="Password" value="anything">
+                    <button type="submit">Login (Vulnerable)</button>
+                </form>
+                
+                <div class="result" id="vulnerableResult"></div>
+            </div>
+            
+            <div class="test-case secure">
+                <h3>✅ ระบบที่มีการป้องกัน</h3>
+                <p>ทดสอบ login กับเซิร์ฟเวอร์ที่มีการป้องกัน</p>
+                
+                <form id="secureLogin">
+                    <input type="text" placeholder="Username" value="admin'; --">
+                    <input type="password" placeholder="Password" value="anything">
+                    <button type="submit">Login (Secure)</button>
+                </form>
+                
+                <div class="result" id="secureResult"></div>
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <h3>🧪 การทดสอบ Input Validation</h3>
+            <p>ลองใส่ข้อมูลที่ผิดปกติและดูว่าระบบตอบสนองอย่างไร</p>
+            
+            <form id="validationTest">
+                <input type="text" id="testName" placeholder="ชื่อ (ลอง XSS payload)">
+                <textarea id="testComment" placeholder="ความคิดเห็น (ลอง script tag)" rows="3"></textarea>
+                <button type="submit">ทดสอบ Validation</button>
+            </form>
+            
+            <div class="result" id="validationResult"></div>
+            
+            <h4>💡 Test Cases แนะนำ:</h4>
+            <ul>
+                <li><code>&lt;script&gt;alert('test')&lt;/script&gt;</code></li>
+                <li><code>' OR '1'='1</code></li>
+                <li>ข้อความยาวเกิน 500 ตัวอักษร</li>
+                <li><code>javascript:alert('xss')</code></li>
+                <li><code>&lt;img src=x onerror=alert(1)&gt;</code></li>
+            </ul>
+        </div>
+        
+        <div class="test-case">
+            <h3>📝 คำถามสำหรับสังเกต:</h3>
+            <ol>
+                <li>ระบบที่มีการป้องกันตอบสนองต่อ SQL injection อย่างไร?</li>
+                <li>Input validation ป้องกันอะไรได้บ้าง?</li>
+                <li>ความแตกต่างระหว่าง string concatenation กับ prepared statements คืออะไร?</li>
+                <li>HTML sanitization ทำงานอย่างไร?</li>
+                <li>การป้องกันแบบไหนที่มีประสิทธิภาพมากที่สุด?</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Test vulnerable login (assuming server on port 3001 is running)
+        document.getElementById('vulnerableLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const username = e.target.querySelector('input[type="text"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            
+            try {
+                const response = await fetch('http://localhost:3001/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('vulnerableResult').innerHTML = `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <strong>Vulnerable Server Response:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('vulnerableResult').innerHTML = `
+                    <div class="error">Error: ${error.message}<br>
+                    <small>Make sure vulnerable server (port 3001) is running</small></div>
+                `;
+            }
+        });
+        
+        // Test secure login
+        document.getElementById('secureLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = e.target.querySelector('input[type="text"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('secureResult').innerHTML = `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <strong>Secure Server Response:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('secureResult').innerHTML = `
+                    <div class="error">Error: ${error.message}</div>
+                `;
+            }
+        });
+        
+        // Test validation
+        document.getElementById('validationTest').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('testName').value;
+            const comment = document.getElementById('testComment').value;
+            
+            try {
+                const response = await fetch('/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, comment })
+                });
+                
+                const data = await response.json();
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <strong>Validation Result:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                        ${data.sanitized ? '<br><em>Content was sanitized for security</em>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="error">Error: ${error.message}</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

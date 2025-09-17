@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 1: SQL Injection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .test-case { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            border-left: 4px solid #ff6b6b;
+        }
+        .vulnerable { border-left-color: #ff6b6b; }
+        .secure { border-left-color: #51cf66; }
+        input, button { 
+            padding: 10px; 
+            margin: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+        button { background: #007bff; color: white; cursor: pointer; }
+        .result { 
+            margin-top: 10px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            background: #e9ecef; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Experiment 1: SQL Injection</h1>
+        
+        <div class="test-case vulnerable">
+            <h3>🚨 Test Case 1: Vulnerable Login</h3>
+            <p>ลองใส่ SQL injection payload ในช่อง username</p>
+            
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" value="admin'; --">
+                <input type="password" id="password" placeholder="Password" value="anything">
+                <button type="submit">Login</button>
+            </form>
+            
+            <div class="result" id="result"></div>
+            
+            <h4>💡 Test Cases ที่แนะนำ:</h4>
+            <ul>
+                <li><code>admin'; --</code> (bypass password)</li>
+                <li><code>' OR '1'='1'; --</code> (login as first user)</li>
+                <li><code>' UNION SELECT 1,2,3,4; --</code> (union injection)</li>
+            </ul>
+        </div>
+        
+        <div class="test-case">
+            <h3>📝 คำถามสำหรับสังเกต:</h3>
+            <ol>
+                <li>เมื่อใส่ <code>admin'; --</code> ใน username เกิดอะไรขึ้น?</li>
+                <li>ทำไมรหัสผ่านไม่สำคัญเมื่อใช้ payload นี้?</li>
+                <li>ดูใน console ว่า SQL query ที่สร้างขึ้นเป็นอย่างไร?</li>
+                <li>ลอง payload อื่นๆ และสังเกตผลลัพธ์</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h4>Result:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h4>Error:</h4>
+                    <p style="color: red;">${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

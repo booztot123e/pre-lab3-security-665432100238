@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 5: HTTP vs HTTPS</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .test-case { 
+            padding: 20px; 
+            border-radius: 8px; 
+        }
+        .http { background: #ffebee; border-left: 4px solid #f44336; }
+        .https { background: #e8f5e8; border-left: 4px solid #4caf50; }
+        .demo-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        input, button { 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        button { background: #007bff; color: white; cursor: pointer; width: auto; }
+        .network-packet {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .vulnerable { color: #d32f2f; }
+        .secure { color: #388e3c; }
+        .result { 
+            margin-top: 10px; 
+            padding: 15px; 
+            border-radius: 4px; 
+            background: white;
+            border: 1px solid #ddd;
+        }
+        .warning { background: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Experiment 5: HTTP vs HTTPS Security</h1>
+        
+        <div class="demo-section">
+            <h3>📡 Network Transmission Simulation</h3>
+            <p>ดูความแตกต่างระหว่างการส่งข้อมูลผ่าน HTTP และ HTTPS</p>
+            
+            <div style="max-width: 400px;">
+                <input type="text" id="demoUsername" placeholder="Username" value="admin">
+                <input type="password" id="demoPassword" placeholder="Password" value="secret123">
+                <button onclick="simulateTransmission()">จำลองการส่งข้อมูล</button>
+            </div>
+            
+            <div id="transmissionResult"></div>
+        </div>
+        
+        <div class="comparison">
+            <div class="test-case http">
+                <h3>🚨 HTTP Server (ไม่ปลอดภัย)</h3>
+                <p>เซิร์ฟเวอร์ที่ไม่เข้ารหัสข้อมูล</p>
+                
+                <form id="httpForm">
+                    <input type="text" placeholder="Username" value="testuser">
+                    <input type="password" placeholder="Password" value="testpass">
+                    <button type="submit">Login via HTTP</button>
+                </form>
+                
+                <div class="result" id="httpResult"></div>
+                
+                <h4>⚠️ ความเสี่ยง HTTP:</h4>
+                <ul>
+                    <li>ข้อมูลส่งแบบ plain text</li>
+                    <li>รหัสผ่านอ่านได้ง่าย</li>
+                    <li>เสี่ยงต่อการดักจับข้อมูล</li>
+                    <li>ไม่มีการยืนยันตัวตนเซิร์ฟเวอร์</li>
+                </ul>
+            </div>
+            
+            <div class="test-case https">
+                <h3>✅ HTTPS Server (ปลอดภัย)</h3>
+                <p>เซิร์ฟเวอร์ที่เข้ารหัสข้อมูล</p>
+                
+                <form id="httpsForm">
+                    <input type="text" placeholder="Username" value="testuser">
+                    <input type="password" placeholder="Password" value="testpass">
+                    <button type="submit">Login via HTTPS</button>
+                </form>
+                
+                <div class="result" id="httpsResult"></div>
+                
+                <h4>🔒 ความปลอดภัย HTTPS:</h4>
+                <ul>
+                    <li>ข้อมูลเข้ารหัสด้วย TLS</li>
+                    <li>รหัสผ่านถูกป้องกัน</li>
+                    <li>ป้องกันการดักจับข้อมูล</li>
+                    <li>ยืนยันตัวตนเซิร์ฟเวอร์ด้วย Certificate</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>👤 Man-in-the-Middle Attack Demo</h3>
+            <p>จำลองการโจมตีดักจับข้อมูลระหว่างทาง</p>
+            
+            <button onclick="simulateMITM()">จำลองการโจมตี MITM</button>
+            
+            <div id="mitmResult"></div>
+        </div>
+        
+        <div class="demo-section">
+            <h3>📝 คำถามสำหรับสังเกต:</h3>
+            <ol>
+                <li>ถ้าคุณเป็นผู้โจมตีที่ดักจับ network traffic ข้อมูลไหนที่คุณเห็นได้?</li>
+                <li>ทำไม HTTPS ถึงปลอดภัยกว่า HTTP?</li>
+                <li>Certificate ใน HTTPS มีหน้าที่อะไร?</li>
+                <li>ในชีวิตจริง เว็บไซต์ไหนที่ควรใช้ HTTPS เสมอ?</li>
+                <li>การใช้ WiFi สาธารณะเสี่ยงอย่างไรกับ HTTP?</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function simulateTransmission() {
+            const username = document.getElementById('demoUsername').value;
+            const password = document.getElementById('demoPassword').value;
+            
+            if (!username || !password) {
+                alert('กรุณาใส่ username และ password');
+                return;
+            }
+            
+            // จำลองการส่งข้อมูลแบบ HTTP
+            const httpPacket = `POST /login HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+{"username":"${username}","password":"${password}"}`;
+            
+            // จำลองการเข้ารหัสแบบ HTTPS (ง่ายๆ)
+            const encrypted = btoa(JSON.stringify({username, password})) + '...encrypted...';
+            const httpsPacket = `TLS Encrypted Data:
+${encrypted}`;
+            
+            document.getElementById('transmissionResult').innerHTML = `
+                <h4>📡 การส่งข้อมูลผ่าน Network:</h4>
+                
+                <div style="margin: 20px 0;">
+                    <h5 class="vulnerable">🚨 HTTP Transmission (อันตราย):</h5>
+                    <div class="network-packet vulnerable">${httpPacket}</div>
+                    <p class="vulnerable">💡 ผู้โจมตีเห็น: Username="${username}", Password="${password}"</p>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h5 class="secure">🔒 HTTPS Transmission (ปลอดภัย):</h5>
+                    <div class="network-packet secure">${httpsPacket}</div>
+                    <p class="secure">💡 ผู้โจมตีเห็น: ข้อมูลที่เข้ารหัสแล้ว (อ่านไม่ได้)</p>
+                </div>
+            `;
+        }
+        
+        function simulateMITM() {
+            document.getElementById('mitmResult').innerHTML = `
+                <h4>👤 Man-in-the-Middle Attack Scenario:</h4>
+                
+                <div style="background: #ffebee; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                    <h5>🚨 HTTP (เสี่ยงต่อการโจมตี):</h5>
+                    <ol>
+                        <li>ผู้ใช้ส่งข้อมูล: POST /login</li>
+                        <li>ผู้โจมตี (ตัวกลาง) ดักจับ: {"username":"admin","password":"secret"}</li>
+                        <li>ผู้โจมตีได้รับ: Username และ Password ชัดเจน</li>
+                        <li>ผลลัพธ์: ❌ ข้อมูลถูกขโมย!</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                    <h5>✅ HTTPS (ป้องกันการโจมตี):</h5>
+                    <ol>
+                        <li>ผู้ใช้ส่งข้อมูลเข้ารหัส: TLS Encrypted Data</li>
+                        <li>ผู้โจมตี (ตัวกลาง) ดักจับ: ข้อมูลที่เข้ารหัสแล้ว</li>
+                        <li>ผู้โจมตีได้รับ: ข้อมูลที่อ่านไม่ได้</li>
+                        <li>ผลลัพธ์: ✅ ข้อมูลปลอดภัย!</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                    <strong>💡 ในชีวิตจริง:</strong>
+                    <ul>
+                        <li>WiFi สาธารณะ = ผู้โจมตีสามารถเป็นตัวกลางได้ง่าย</li>
+                        <li>HTTP = ข้อมูลส่งแบบเปิด อ่านได้ทันที</li>
+                        <li>HTTPS = ข้อมูลเข้ารหัส ป้องกันการดักจับ</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // HTTP Form submission
+        document.getElementById('httpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const username = e.target.querySelector('input[type="text"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            
+            try {
+                const response = await fetch('http://localhost:3005/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('httpResult').innerHTML = `
+                    <div class="warning">
+                        <h4>HTTP Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>⚠️ คำเตือน:</strong> รหัสผ่านถูกส่งแบบ plain text!</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('httpResult').innerHTML = `
+                    <div class="warning">
+                        <p>❌ Error: ${error.message}</p>
+                        <p><small>ตรวจสอบว่า HTTP server (port 3005) ทำงานอยู่หรือไม่</small></p>
+                    </div>
+                `;
+            }
+        });
+        
+        // HTTPS Form submission
+        document.getElementById('httpsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = e.target.querySelector('input[type="text"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            
+            try {
+                const response = await fetch('http://localhost:3006/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('httpsResult').innerHTML = `
+                    <div class="success">
+                        <h4>HTTPS Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>✅ ปลอดภัย:</strong> ข้อมูลถูกเข้ารหัสระหว่างการส่ง!</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('httpsResult').innerHTML = `
+                    <div class="success">
+                        <p>❌ Error: ${error.message}</p>
+                        <p><small>ตรวจสอบว่า HTTPS server (port 3006) ทำงานอยู่หรือไม่</small></p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

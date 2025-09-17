@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 4: Password Security</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-case { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            border-left: 4px solid #007bff;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        input, button, select { 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        button { background: #007bff; color: white; cursor: pointer; width: auto; }
+        .result { 
+            margin-top: 10px; 
+            padding: 15px; 
+            border-radius: 4px; 
+            background: white;
+            border: 1px solid #ddd;
+        }
+        .strength-meter {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .strength-bar {
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        .very-weak { background: #dc3545; }
+        .weak { background: #fd7e14; }
+        .fair { background: #ffc107; }
+        .good { background: #28a745; }
+        .strong { background: #20c997; }
+        .very-strong { background: #6f42c1; }
+        .hash-demo { 
+            font-family: monospace; 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 4px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Experiment 4: Password Security</h1>
+        
+        <div class="grid">
+            <div class="test-case">
+                <h3>🔍 Password Strength Checker</h3>
+                <p>ทดสอบความแข็งแรงของรหัสผ่าน</p>
+                
+                <input type="password" id="passwordInput" placeholder="ใส่รหัสผ่านที่ต้องการทดสอบ">
+                <button onclick="checkStrength()">ตรวจสอบความแข็งแรง</button>
+                
+                <div id="strengthResult"></div>
+                
+                <h4>🧪 รหัสผ่านทดสอบ:</h4>
+                <ul>
+                    <li><code>admin</code> - อ่อนแอมาก</li>
+                    <li><code>password123</code> - อ่อนแอ</li>
+                    <li><code>MyPass2024</code> - ปานกลาง</li>
+                    <li><code>MySecure#Pass2024</code> - แข็งแรง</li>
+                </ul>
+            </div>
+            
+            <div class="test-case">
+                <h3>🔐 Password Hashing Demo</h3>
+                <p>ดูความแตกต่างของการเก็บรหัสผ่าน</p>
+                
+                <input type="text" id="hashPassword" placeholder="รหัสผ่านที่ต้องการ hash">
+                <select id="hashMethod">
+                    <option value="plain">Plain Text (ไม่ปลอดภัย)</option>
+                    <option value="md5">MD5 (ไม่ปลอดภัย)</option>
+                    <option value="sha256">SHA-256 (ไม่ปลอดภัย)</option>
+                    <option value="salted">SHA-256 + Salt (ปลอดภัย)</option>
+                </select>
+                <button onclick="hashPassword()">สร้าง Hash</button>
+                
+                <div id="hashResult"></div>
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <h3>📊 การเปรียบเทียบ Password Storage Methods</h3>
+            <p>ลองใส่รหัสผ่านเดียวกันและดูผลลัพธ์จากวิธีการต่างๆ</p>
+            
+            <input type="text" id="comparePassword" placeholder="รหัสผ่านสำหรับเปรียบเทียบ" value="mypassword123">
+            <button onclick="compareAllMethods()">เปรียบเทียบทุกวิธี</button>
+            
+            <div id="comparisonResult"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>📝 คำถามสำหรับสังเกต:</h3>
+            <ol>
+                <li>ทำไม Plain Text ถึงอันตราย?</li>
+                <li>ความแตกต่างระหว่าง MD5 กับ SHA-256 คืออะไร?</li>
+                <li>Salt ช่วยป้องกันอะไร?</li>
+                <li>ลองใส่รหัสผ่านเดียวกันใน Salted Hash หลายครั้ง ผลลัพธ์เป็นอย่างไร?</li>
+                <li>รหัสผ่านที่แข็งแรงควรมีองค์ประกอบอะไรบ้าง?</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function checkStrength() {
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!password) {
+                alert('กรุณาใส่รหัสผ่าน');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/check-strength', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const result = await response.json();
+                
+                const percentage = (result.score / result.maxScore) * 100;
+                const strengthClass = result.strength.replace(/\s+/g, '-').toLowerCase();
+                
+                document.getElementById('strengthResult').innerHTML = `
+                    <h4>ผลการวิเคราะห์:</h4>
+                    <div class="strength-meter">
+                        <div class="strength-bar ${strengthClass}" style="width: ${percentage}%"></div>
+                    </div>
+                    <p><strong>ระดับความแข็งแรง:</strong> ${result.strength} (${result.score}/${result.maxScore})</p>
+                    ${result.feedback.length > 0 ? `
+                        <p><strong>ข้อเสนอแนะ:</strong></p>
+                        <ul>${result.feedback.map(f => `<li>${f}</li>`).join('')}</ul>
+                    ` : '<p style="color: green;">✅ รหัสผ่านแข็งแรงดี!</p>'}
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function hashPassword() {
+            const password = document.getElementById('hashPassword').value;
+            const method = document.getElementById('hashMethod').value;
+            
+            if (!password) {
+                alert('กรุณาใส่รหัสผ่าน');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/hash-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, method })
+                });
+                
+                const result = await response.json();
+                
+                document.getElementById('hashResult').innerHTML = `
+                    <h4>${result.method}</h4>
+                    <div class="hash-demo">${result.stored}</div>
+                    <p style="color: ${result.color};">${result.security}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function compareAllMethods() {
+            const password = document.getElementById('comparePassword').value;
+            
+            if (!password) {
+                alert('กรุณาใส่รหัสผ่าน');
+                return;
+            }
+            
+            const methods = ['plain', 'md5', 'sha256', 'salted'];
+            let results = '';
+            
+            for (const method of methods) {
+                try {
+                    const response = await fetch('/hash-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password, method })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    results += `
+                        <div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                            <h4>${result.method}</h4>
+                            <div class="hash-demo">${result.stored}</div>
+                            <p style="color: ${result.color};">${result.security}</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+            
+            document.getElementById('comparisonResult').innerHTML = `
+                <h4>ผลการเปรียบเทียบสำหรับรหัสผ่าน: "${password}"</h4>
+                ${results}
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 4px; margin-top: 20px;">
+                    <strong>💡 สังเกต:</strong> Salted hash จะให้ผลลัพธ์ที่แตกต่างกันทุกครั้ง เพราะ salt ถูกสร้างแบบสุ่ม
+                </div>
+            `;
+        }
+        
+        // Real-time password strength checking
+        document.getElementById('passwordInput').addEventListener('input', function() {
+            if (this.value.length > 0) {
+                setTimeout(checkStrength, 300);
+            }
+        });
+    </script>
+</body>
+</html>
