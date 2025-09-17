@@ -69,8 +69,8 @@
 | การเข้ารหัสข้อมูล     | ผมว่าไม่มีเลย | มี TLS ดูปลอดภัย |
 | ความปลอดภัยรหัสผ่าน  | อ่านได้ชัดเจน | ป้องกันดี    |
 | การป้องกัน MITM     | ไม่มีเลย     | มีแน่นอน     |
-![alt text](image-6.png)
-![alt text](image-7.png)
+![XSS Alert](screenshots/image-6.png)
+![XSS Alert](screenshots/image-7.png)
 ### ผลกระทบของ Man-in-the-Middle Attack
 - ผมลองคิดดูแล้ว ถ้าใช้ HTTP ผู้โจมตีจะเห็น username กับ password ชัดๆ
 - แต่ถ้าใช้ HTTPS ข้อมูลจะเข้ารหัส ทำให้มองไม่เห็นอะไร
